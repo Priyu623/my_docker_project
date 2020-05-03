@@ -1,0 +1,38 @@
+version: "3"
+networks:
+  net1:
+services:
+  mydbos:
+    image: mysql:5.7
+    volumes:
+      - mysql_storage:/var/lib/mysql
+    networks:
+      - net1
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_USER: king
+      MYSQL_PASSWORD: kingpass
+      MYSQL_DATABASE: mydb
+
+  wpos:
+    image: wordpress:5.1.1-php7.3-apache
+    depends_on:
+      - mydbos
+    ports:
+      - 8090:80
+    volumes:
+      - wp_storage:/var/www/html
+    restart: always
+    links:
+      - mydbos:mysql
+    networks:
+      - net1
+    environment:
+      WORDPRESS_DB_HOST: mydbos:3306
+      WORDPRESS_DB_USER: king
+      WORDPRESS_DB_PASSWORD: kingpass
+      WORDPRESS_DB_NAME: mydb
+volumes:
+  mysql_storage:
+  wp_storage:
